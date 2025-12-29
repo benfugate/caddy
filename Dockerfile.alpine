@@ -1,4 +1,6 @@
-FROM caddy:builder-alpine AS builder
+ARG CADDY_BUILDER_IMAGE_ALPINE=caddy:builder-alpine
+
+FROM ${CADDY_BUILDER_IMAGE_ALPINE} AS builder
 
 RUN caddy-builder \
     github.com/caddy-dns/cloudflare \

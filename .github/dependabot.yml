@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: daily
+    # Keep PR noise low
+    open-pull-requests-limit: 1
+    # Keep the tag (e.g. caddy:latest) but update the pinned digest
+    # Dependabot does this automatically when a FROM uses tag@sha256:digest
+    commit-message:
+      prefix: chore
+      include: scope
+    # Scope to the caddy image only (covers Dockerfile and Dockerfile.alpine if pinned)
+    allow:
+      - dependency-name: "caddy"

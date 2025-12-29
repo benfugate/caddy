@@ -5,3 +5,11 @@
 
 # Built Visual Studio Code Extensions
 *.vsix
+
+# IDE files
+.idea/
+
+# Stray local files
+.done
+.done*
+done

@@ -11,7 +11,7 @@ I'm using this image in production myself, but you may wish to fork it and deplo
 
 ## Images
 
-Includes images for regular and alpine versions of Caddy. Each are rebuilt every Monday morning at 0300 UTC from the `:latest` and `:alpine` tags respectively. Visit this repository on [Docker Hub](https://hub.docker.com/r/benfugate/caddy) to pull images.
+Includes images for regular and alpine versions of Caddy. Rebuilds are event-driven: when Docker Hub updates the `caddy:latest` digest, Dependabot bumps our pinned digest and CI merges/republishes. This rebuilds and pushes both `:latest` and `:alpine` images. Visit this repository on [Docker Hub](https://hub.docker.com/r/benfugate/caddy) to pull images.
 
 ## Requirements
 1. A Cloudflare account

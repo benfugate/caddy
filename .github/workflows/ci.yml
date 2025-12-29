@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ master, main ]
+    paths:
+      - 'Dockerfile'
+      - 'Dockerfile.alpine'
+      - '.github/**'
+  push:
+    branches: [ master, main ]
+    paths:
+      - 'Dockerfile'
+      - 'Dockerfile.alpine'
+      - '.github/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Dockerfile (default)
+        run: docker build -f Dockerfile .
+      - name: Build Dockerfile (alpine)
+        if: hashFiles('Dockerfile.alpine') != ''
+        run: docker build -f Dockerfile.alpine .
+
+  automerge:
+    if: github.actor == 'dependabot[bot]'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Dependabot metadata
+        id: meta
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Approve PR
+        if: steps.meta.outputs.package-ecosystem == 'docker' && contains(steps.meta.outputs.dependency-names, 'caddy')
+        uses: peter-evans/approve-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pull-request-number: ${{ github.event.pull_request.number }}
+          comment: Auto-approving Dependabot Docker digest update.
+      - name: Enable auto-merge
+        if: steps.meta.outputs.package-ecosystem == 'docker' && contains(steps.meta.outputs.dependency-names, 'caddy')
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pull-request-number: ${{ github.event.pull_request.number }}
+          merge-method: squash
