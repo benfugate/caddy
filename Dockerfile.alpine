@@ -6,6 +6,6 @@ RUN caddy-builder \
     github.com/caddy-dns/cloudflare \
     github.com/WeidiDeng/caddy-cloudflare-ip
 
-FROM caddy:alpine
+FROM caddy:alpine@sha256:a4983e09003e598c28ef85197c16bb2fdd34da8b2526487c0d144f38fd3b2970
 
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy

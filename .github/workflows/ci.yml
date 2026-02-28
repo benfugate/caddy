@@ -45,11 +45,12 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Approve PR
         if: steps.meta.outputs.package-ecosystem == 'docker' && contains(steps.meta.outputs.dependency-names, 'caddy')
-        uses: peter-evans/approve-pull-request@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          pull-request-number: ${{ github.event.pull_request.number }}
-          comment: Auto-approving Dependabot Docker digest update.
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr review --approve "$PR_URL"
+          gh pr comment "$PR_URL" --body "Auto-approving Dependabot Docker digest update."
       - name: Enable auto-merge
         if: steps.meta.outputs.package-ecosystem == 'docker' && contains(steps.meta.outputs.dependency-names, 'caddy')
         uses: peter-evans/enable-pull-request-automerge@v3
