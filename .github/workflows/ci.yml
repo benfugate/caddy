@@ -2,13 +2,13 @@ name: CI
 
 on:
   pull_request:
-    branches: [ master, main ]
+    branches: [ master ]
     paths:
       - 'Dockerfile'
       - 'Dockerfile.alpine'
       - '.github/**'
   push:
-    branches: [ master, main ]
+    branches: [ master ]
     paths:
       - 'Dockerfile'
       - 'Dockerfile.alpine'
