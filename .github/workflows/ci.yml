@@ -55,6 +55,6 @@ jobs:
         if: steps.meta.outputs.package-ecosystem == 'docker' && contains(steps.meta.outputs.dependency-names, 'caddy')
         uses: peter-evans/enable-pull-request-automerge@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.MERGE_GITHUB_TOKEN }}
           pull-request-number: ${{ github.event.pull_request.number }}
           merge-method: squash
