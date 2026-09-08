@@ -1,6 +1,6 @@
 # caddy-cloudflare
 
-[![Build and Push Docker Images](https://github.com/benfugate/caddy/actions/workflows/publish.yml/badge.svg)](https://github.com/benfugate/caddy/actions/workflows/publish.yml)
+[![Build and Push Docker Image](https://github.com/benfugate/caddy/actions/workflows/publish.yml/badge.svg)](https://github.com/benfugate/caddy/actions/workflows/publish.yml)
 [![](https://img.shields.io/docker/pulls/benfugate/caddy)](https://hub.docker.com/r/benfugate/caddy)
 
 Caddy with integrated support for Cloudflare DNS-01 ACME verification challenges, real IP resolution, and Cloudflare IP range support.
@@ -9,21 +9,30 @@ Caddy with integrated support for Cloudflare DNS-01 ACME verification challenges
 
 ## Images
 
-Includes images for regular and alpine variants of Caddy. Rebuilds are event-driven: when Docker Hub updates the `caddy:latest` or `caddy:alpine` digest, Dependabot bumps the pinned digest and CI merges/republishes automatically. This rebuilds and pushes both `:latest` and `:alpine` images. Visit this repository on [Docker Hub](https://hub.docker.com/r/benfugate/caddy) to pull images.
+A single image is published as `benfugate/caddy:latest`, for `linux/amd64` and `linux/arm64`. Rebuilds are event-driven: when Docker Hub updates the pinned `caddy` digest, Dependabot bumps it and CI merges and republishes automatically. Visit this repository on [Docker Hub](https://hub.docker.com/r/benfugate/caddy) to pull images.
 
 ## Modules
 
-### `:latest`
 | Module | Description |
 |--------|-------------|
 | [caddy-dns/cloudflare](https://github.com/caddy-dns/cloudflare) | Cloudflare DNS provider for DNS-01 ACME challenges |
-| [kirsch33/realip](https://github.com/kirsch33/realip) | Replaces the client IP with the value from a trusted header (e.g. `X-Forwarded-For`) |
+| [WeidiDeng/caddy-cloudflare-ip](https://github.com/WeidiDeng/caddy-cloudflare-ip) | Fetches Cloudflare IP ranges so they can be used with `trusted_proxies cloudflare` |
+| [hslatman/caddy-crowdsec-bouncer](https://github.com/hslatman/caddy-crowdsec-bouncer) | Blocks malicious traffic based on decisions made by [CrowdSec](https://crowdsec.net/) |
 
-### `:alpine`
-| Module | Description |
-|--------|-------------|
-| [caddy-dns/cloudflare](https://github.com/caddy-dns/cloudflare) | Cloudflare DNS provider for DNS-01 ACME challenges |
-| [WeidiDeng/caddy-cloudflare-ip](https://github.com/WeidiDeng/caddy-cloudflare-ip) | Fetches Cloudflare IP ranges and allows using them as trusted proxies |
+Real client IP behind Cloudflare is handled by Caddy's native `trusted_proxies`, which
+`caddy-cloudflare-ip` feeds with Cloudflare's current ranges:
+
+```Caddyfile
+{
+    servers {
+        trusted_proxies cloudflare
+    }
+}
+```
+
+This sets `{client_ip}` for access logs, the `client_ip` matcher, and any module that reads
+it. The [kirsch33/realip](https://github.com/kirsch33/realip) module was previously included
+in `:latest` and has been removed - Caddy absorbed that functionality natively in v2.7.0.
 
 ## Requirements
 1. A Cloudflare account
