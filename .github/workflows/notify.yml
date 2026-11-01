@@ -9,15 +9,15 @@ permissions:
   contents: read
 
 jobs:
-  discord:
+  ntfy:
     # Covers hard failures and hung runs. Cancelled runs are deliberately
     # excluded: those are almost always user-initiated.
     if: contains(fromJSON('["failure","timed_out"]'), github.event.workflow_run.conclusion)
     runs-on: ubuntu-latest
     steps:
-      - name: Post failure to Discord
+      - name: Post failure to ntfy
         env:
-          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
           RUN_NAME: ${{ github.event.workflow_run.name }}
           RUN_URL: ${{ github.event.workflow_run.html_url }}
           BRANCH: ${{ github.event.workflow_run.head_branch }}
@@ -25,32 +25,16 @@ jobs:
           ACTOR: ${{ github.event.workflow_run.actor.login }}
           REPO: ${{ github.repository }}
         run: |
-          if [ -z "$WEBHOOK" ]; then
-            echo "::error::DISCORD_WEBHOOK is empty. Add it under Settings > Secrets and variables > Actions."
+          if [ -z "$NTFY_TOKEN" ]; then
+            echo "::error::NTFY_TOKEN is empty. Add it under Settings > Secrets and variables > Actions."
             exit 1
           fi
-          jq -n \
-            --arg name "$RUN_NAME" \
-            --arg url "$RUN_URL" \
-            --arg branch "$BRANCH" \
-            --arg sha "${SHA:0:7}" \
-            --arg actor "$ACTOR" \
-            --arg repo "$REPO" \
-            '{
-              username: "GitHub Actions",
-              embeds: [{
-                title: ("❌ " + $name + " failed"),
-                url: $url,
-                color: 15548997,
-                fields: [
-                  { name: "Repo",    value: $repo,   inline: true },
-                  { name: "Branch",  value: $branch, inline: true },
-                  { name: "Commit",  value: $sha,    inline: true },
-                  { name: "Actor",   value: $actor,  inline: true }
-                ]
-              }]
-            }' > payload.json
+          printf 'Repo: %s\nBranch: %s\nCommit: %s\nActor: %s\n' \
+            "$REPO" "$BRANCH" "${SHA:0:7}" "$ACTOR" > message.txt
           curl -sS -f -X POST \
-            -H "Content-Type: application/json" \
-            -d @payload.json \
-            "$WEBHOOK"
+            -H "Authorization: Bearer $NTFY_TOKEN" \
+            -H "Title: $RUN_NAME failed" \
+            -H "Tags: x,github" \
+            -H "Click: $RUN_URL" \
+            --data-binary @message.txt \
+            https://ntfy.fugate.co/homelab
