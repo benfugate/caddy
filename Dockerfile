@@ -7,6 +7,6 @@ RUN xcaddy build \
     --with github.com/WeidiDeng/caddy-cloudflare-ip \
     --with github.com/hslatman/caddy-crowdsec-bouncer/http
 
-FROM caddy:latest@sha256:ce773ec7a742ce15ee6bf2bb5f65882b9e2a4487b10733e6f1484f86e6b5d8bc
+FROM caddy:latest@sha256:4e2425f6009577e7c651010f16679c28f7d12df3e7b1914f941a7a3370746b3c
 
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy
